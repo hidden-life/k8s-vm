@@ -1,0 +1,14 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name:  jkube-http
+  labels:
+    run: jkube-label
+spec:
+  selector:
+    app:  jkube-http
+  type: NodePort
+  ports:
+  - name:  jkube-port
+    port:  8080
+    targetPort:  8080

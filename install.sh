@@ -1,55 +1,56 @@
 #!/bin/bash
 
 # Update nodes hosts
-echo "--- [TASK 1] Updating /etc/hosts file ---"
+echo "[TASK 1 - Updating node /etc/hosts file]"
 cat >> /etc/hosts <<EOF
-172.42.42.100   master.node     master
-172.42.42.101   worker1.node    worker1
-172.42.42.102   worker2.node    worker2
+192.168.50.200   master.node     master
+192.168.50.201   worker1.node    worker1
+192.168.50.202   worker2.node    worker2
 EOF
-echo "--- [TASK 1] Finished ---"
+echo "[TASK 1 - Finished]"
 
 # Install docker
-echo "--- [TASK 2] Install docker ---"
-echo "---> Install required packages ---"
+echo "[TASK 2 - Install docker]"
+echo "---> Install required packages"
 yum install -y -q yum-utils device-mapper-persistent-data lvm2 > /dev/null 2>&1
-echo "---> Setup stable repository for this OS ---"
+echo "---> Setup stable repository for OS"
 yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo > /dev/null 2>&1
-echo "---> Installing docker ---"
+echo "---> Installing Docker"
 yum install -y -q docker-ce docker-ce-cli containerd.io > /dev/null 2>&1
-echo "---> Enabling docker ---"
+echo "---> Enabling Docker"
 systemctl enable docker
-echo "---> Start docker ---"
+echo "---> Start Docker"
 systemctl start docker
-echo "--- [TASK 2] Finished ---"
+echo "[TASK 2 - Finished]"
 
 # Disable SELinux and Firewall
-echo "--- [TASK 3] Disable SELinux & firewall ---"
-echo "---> Disabling SELinux ---"
+echo "[TASK 3 - Disable SELinux & firewall]"
+echo "---> Disabling SELinux"
 setenforce 0
 sed -i --follow-symlinks 's/^SELINUX=enforcing/SELINUX=disabled/' /etc/sysconfig/selinux
-echo "---> Disabling firewall ---"
+echo "---> Disabling firewall"
 systemctl disable firewalld > /dev/null 2>&1
+echo "---> Stoping firewall"
 systemctl stop firewalld
-echo "--- [TASK 3] Finished ---"
+echo "[TASK 3 - Finished]"
 
 # Add sysctl settings
-echo "--- [TASK 4] Add sysctl settings ---"
+echo "[TASK 4 - Add sysctl settings for iptables]"
 cat >> /etc/sysctl.d/kubernetes.conf<<EOF
 net.bridge.bridge-nf-call-ip6tables = 1
 net.bridge.bridge-nf-call-iptables = 1
 EOF
 sysctl --system > /dev/null 2>&1
-echo "--- [TASK 4] Finished ---"
+echo "[TASK 4 - Finished]"
 
 # Swap off
-echo "--- [TASK 5] Disable and turn off SWAP  ---"
+echo "[TASK 5 - Disable and turn off SWAP]"
 sed -i '/swap/d' /etc/fstab
 swapoff -a
-echo "--- [TASK 5] Finished ---"
+echo "[TASK 5 - Finished]"
 
 # K8s repository
-echo "--- [TASK 6] Add kubernetes repository ---"
+echo "[TASK 6 - Add kubernetes repository]"
 cat >> /etc/yum.repos.d/kubernetes.repo <<EOF
 [kubernetes]
 name=Kubernetes
@@ -60,31 +61,32 @@ repo_gpgcheck=1
 gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg
         https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
 EOF
-echo "--- [TASK 6] Finished ---"
+echo "[TASK 6 - Finished]"
 
 # Install k8s
-echo "--- [TASK 7] Install kubernetes (kubeadm, kubectl, kubelet) ---"
+echo "[TASK 7 - Install kubernetes (kubeadm, kubectl, kubelet)]"
 yum install -y -q kubeadm kubelet kubectl > /dev/null 2>&1
-echo "--- [TASK 7] Finished ---"
+echo "[TASK 7 - Finished]"
 
 # Enable service
-echo "--- [TASK 8] Enable and start kubelet service ---"
-echo "---> Enabling kubelet ---"
+echo "[TASK 8 - Enable and start kubelet service]"
+echo "---> Enabling kubelet"
 systemctl enable kubelet > /dev/null 2>&1
-echo "---> Starting kubelet ---"
+echo "---> Starting kubelet"
 systemctl start kubelet > /dev/null 2>&1
-echo "--- [TASK 8] Finished ---"
+echo "[TASK 8 - Finished]"
 
 # Enable SSH
-echo "--- [TASK 9] Enable SSH password authentication ---"
+echo "[TASK 9 - Enable SSH password authentication]"
+echo "---> Add password authentication to config"
 sed -i 's/^PasswordAuthentication no/PasswordAuthentication yes/' /etc/ssh/sshd_config
-echo "---> Reloading SSH ---"
+echo "---> Reloading SSH"
 systemctl reload sshd
-echo "--- [TASK 9] Finished ---"
+echo "[TASK 9 - Finished]"
 
 # Set password 'rootpassword'
-echo "--- [TASK 10] Setting password for root access ---"
+echo "[TASK 10 - Setting password for root access]"
 echo "rootpassword" | passwd --stdin root > /dev/null 2>&1
-echo "---> Updating bashrc users file ---"
+echo "---> Updating bashrc users file"
 echo "export TERM=xterm" >> /etc/bashrc
-echo "--- [TASK 10] Finished ---"
+echo "[TASK 10 - Finished]"

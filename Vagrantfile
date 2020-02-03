@@ -14,7 +14,7 @@ Vagrant.configure(2) do |config|
     config.vm.define "kube-master" do |master|
         master.vm.box = IMG_NAME
         master.vm.hostname = "master.node"
-        master.vm.network "private_network", ip: "172.42.42.100"
+        master.vm.network "private_network", ip: "192.168.50.200"
         master.vm.provider "libvirt" do |v|
             v.memory = 2048
             v.cpus = 2
@@ -26,7 +26,7 @@ Vagrant.configure(2) do |config|
         config.vm.define "kube-node-#{i}" do |worker|
             worker.vm.box = IMG_NAME
             worker.vm.hostname = "worker#{i}.node"
-            worker.vm.network "private_network", ip: "172.42.42.10#{i}"
+            worker.vm.network "private_network", ip: "192.168.50.20#{i}"
             worker.vm.provider "libvirt" do |v|
                 v.memory = 1024
                 v.cpus = 1
