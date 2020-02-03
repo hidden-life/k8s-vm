@@ -36,11 +36,10 @@ This scipts allow to setup a cluster on one machine (physical or virtual) with m
 
 - Setup cluster
 > Clone repository:
->> git clone git@git.socium.vin:root/ks8-vm.git
 
->> git clone http://git.socium.vin/root/ks8-vm.git
+>> git clone https://github.com/j4ck5on/k8s.git
 
->> cd ks8-vm
+>> cd k8s
 
 Open _Vagrantfile_ in text editor. 
 
